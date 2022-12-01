@@ -1,19 +1,13 @@
 (ns day1.core
   (:require [clojure.string :as string]))
 
-(defn build-groups [calories-list]
-  (loop [calories-groups []
-         current-list calories-list]
-    (if (empty? current-list) calories-groups
-        (let [[next-group remaining-list] (split-with (partial not= "") current-list)]
-          (recur (conj calories-groups (map read-string next-group))
-                 (rest remaining-list))))))
-
 (def input
   (->> "src/day1/input.txt"
        slurp
        string/split-lines
-       build-groups))
+       (map parse-long)
+       (partition-by some?)
+       (remove #{'(nil)})))
 
 (defn part1 []
   (->> input
@@ -28,8 +22,10 @@
        (reduce +)))
 
 (comment
+  (take 1 input)
+  ;; => ((3427 3273 5615 5943 3125 4245 4194 3243 4283 1790 5355 4239 5541))
   (part1)
-  ;; 68775
+  ;; => 68775
   (part2)
-  ;; 202585
+  ;; => 202585
   )
