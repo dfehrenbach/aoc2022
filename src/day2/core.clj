@@ -11,15 +11,15 @@
   {;; indexed by elf shape then our shape OR match outcome
    ;; loses, draws, and wins are 0, 3, and 6 points respectively
    ;; and our usage of rock, paper, scissors are 1, 2, 3 points respectively
-   :rock     {:rock     (+ 1 3) :draw      (+ 1 3)
-              :paper    (+ 2 6) :win      (+ 2 6)
-              :scissors (+ 3 0) :lose     (+ 3 0)}
-   :paper    {:rock     (+ 1 0) :lose     (+ 1 0)
-              :paper    (+ 2 3) :draw      (+ 2 3)
-              :scissors (+ 3 6) :win      (+ 3 6)}
-   :scissors {:rock     (+ 1 6) :win      (+ 1 6)
-              :paper    (+ 2 0) :lose     (+ 2 0)
-              :scissors (+ 3 3) :draw      (+ 3 3)}})
+   :rock     {:rock     (+ 1 3) :draw (+ 1 3)
+              :paper    (+ 2 6) :win  (+ 2 6)
+              :scissors (+ 3 0) :lose (+ 3 0)}
+   :paper    {:rock     (+ 1 0) :lose (+ 1 0)
+              :paper    (+ 2 3) :draw (+ 2 3)
+              :scissors (+ 3 6) :win  (+ 3 6)}
+   :scissors {:rock     (+ 1 6) :win  (+ 1 6)
+              :paper    (+ 2 0) :lose (+ 2 0)
+              :scissors (+ 3 3) :draw (+ 3 3)}})
 
 (def elf-letter->shape
   {"A" :rock
