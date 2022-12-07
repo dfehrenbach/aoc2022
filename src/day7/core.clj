@@ -6,25 +6,21 @@
        slurp
        string/split-lines))
 
-(def test-input
-  (->> "src/day7/test-input.txt"
-       slurp
-       string/split-lines))
-
 (def init-system {"/" {:size 0 :children {} :type :dir}})
 
 ;; keep track of dir path
 ;; [/ a b c] as /a/b/c and uncover file sizes
-;; can either build as you go by taking all discovered files and adding to total on each path
+;; Going with -> THIS ONE: can either build as you go by taking all discovered files and adding to total on each path
 ;; or build numbers at the end doing one level at a time from the bottom up
+
 (defn init-dir [system path instruction]
   (let [name (second (string/split instruction #" "))]
     (assoc-in system (concat (interleave path (repeat :children)) [name])
-              {:size 0 :children {} :type :dir})))
+              {:size 0 :children {} :type :dir :name name})))
 
 (defn init-file [system path size name]
   (assoc-in system (concat (interleave path (repeat :children)) [name])
-            {:size size :type :file}))
+            {:size size :type :file :name name}))
 
 (defn cascade-file-size-upwards [system path size]
   (let [all-paths (rest (reductions conj [] path))]
@@ -41,7 +37,7 @@
       ".." (pop path)
       (conj path name))))
 
-(defn parse-new-file [system path instruction]
+(defn add-in-new-file [system path instruction]
   (let [[size-str name] (string/split instruction #" ")]
     (-> system
         (init-file path (parse-long size-str) name)
@@ -52,47 +48,55 @@
          system init-system
          path []]
     (if (empty? instructions) system
-        (let [[instruction & rest-instructions] instructions
-              [next-instructions next-system next-path]
-              (cond
-                (string/starts-with? instruction "$ cd") [rest-instructions system (parse-cd-path instruction path)]
-                (string/starts-with? instruction "$ ls") [rest-instructions system path]
-                (string/starts-with? instruction "dir") [rest-instructions (init-dir system path instruction) path]
-                (re-matches #"\d.*" instruction) [rest-instructions (parse-new-file system path instruction) path])]
-          (recur next-instructions next-system next-path)))))
+        (let [[instruction & rest-instructions] instructions]
+          (cond
+            (string/starts-with? instruction "$ cd")
+            (recur rest-instructions system (parse-cd-path instruction path))
 
-;;Then it's about walking the tree to find sizes that dip under
+            (string/starts-with? instruction "$ ls")
+            (recur rest-instructions system path)
 
+            (string/starts-with? instruction "dir")
+            (recur rest-instructions (init-dir system path instruction) path)
+
+            (re-matches #"\d.*" instruction)
+            (recur rest-instructions (add-in-new-file system path instruction) path))))))
+
+;;Then it's about walking the tree to find directory sizes that dip under
+(defn all-directories [system]
+  (filter #(and (map? %)
+                (contains? % :type)
+                (= :dir (:type %)))
+          (tree-seq map? vals system)))
+
+(defn part1 [input]
+  (->> input
+       read-instructions
+       all-directories
+       (map :size)
+       (filter (partial >= 100000))
+       (reduce +)))
+
+(defn part2 [input]
+  (let [full-system (read-instructions input)
+        used-space (get-in full-system ["/" :size])]
+    (->> full-system
+         all-directories
+         (map :size)
+         (filter #(<= 30000000 (+ % (- 70000000 used-space))))
+         (apply min))))
 
 (comment
   (take 5 input)
+  ;; => ("$ cd /" "$ ls" "dir ddpgzpc" "dir mqjrd" "dir mrqjg")
 
-  #_(tree-seq (fn [node]
-                (prn node)
-                (:children (first (vals node)))) (comp :children first vals)
-              {"/" {:children {:a 1 :b 2}}})
+  (nth (->> input read-instructions all-directories) 5)
+  ;; => {:size 74360, :children {"zjq" {:size 74360, :type :file, :name "zjq"}}, 
+  ;;     :type :dir, :name "dtgnbb"}
 
-  #_(count (tree-seq #(= :dir (:type (first (vals %)))) (comp :children first vals)
-                     (read-instructions test-input)))
+  (part1 input)
+  ;; => 1915606
 
-  ;; test-input results
-  {"/" {:size 48381165, :children
-        {"a" {:size 94853, :children
-              {"e" {:size 584, :children
-                    {"i" {:size 584, :type :file}},
-                    :type :dir},
-               "f" {:size 29116, :type :file},
-               "g" {:size 2557, :type :file},
-               "h.lst" {:size 62596, :type :file}}, :type :dir},
-         "b.txt" {:size 14848514, :type :file},
-         "c.dat" {:size 8504156, :type :file},
-         "d" {:size 24933642, :children
-              {"j" {:size 4060174, :type :file},
-               "d.log" {:size 8033020, :type :file},
-               "d.ext" {:size 5626152, :type :file},
-               "k" {:size 7214296, :type :file}},
-              :type :dir}},
-        :type :dir}}
-
-  (read-instructions input)
-  0)
+  (part2 input)
+  ;; => 5025657
+  )
