@@ -5,11 +5,11 @@
   (let [[_ op1 f op2] (re-find #"= (.+) ([+*]) (.+)" s)]
     (fn [old]
       ((eval (symbol f))
-       (if (= op1 "old") old (bigint (parse-long op1)))
-       (if (= op2 "old") old (bigint (parse-long op2)))))))
+       (if (= op1 "old") old (parse-long op1))
+       (if (= op2 "old") old (parse-long op2))))))
 
 (defn extract-first-num [str]
-  (bigint (parse-long (re-find #"\d+" str))))
+  (parse-long (re-find #"\d+" str)))
 
 (defn parse-test [test-str true-str false-str]
   (let [div-by (extract-first-num test-str)
@@ -22,9 +22,10 @@
 
 (defn parse-monkey [lines]
   (let [[_ items-str op-str test-str true-str false-str] lines]
-    {:items (mapv (comp bigint parse-long) (re-seq #"\d+" items-str))
+    {:items (mapv parse-long (re-seq #"\d+" items-str))
      :op (parse-operation op-str)
      :test (parse-test test-str true-str false-str)
+     :test-divisor (extract-first-num test-str)
      :items-inspected 0}))
 
 (def input
@@ -43,68 +44,54 @@
        (remove #{'("")})
        (mapv parse-monkey)))
 
+(defn reduce-worry [item-val]
+  (quot item-val 3))
 
-(defn monkey-inspect [worry-div all-monkeys monkey-n]
-  (let [monkey (get all-monkeys monkey-n)]
-    (if-let [item (first (:items monkey))]
-      (recur worry-div
-             (-> all-monkeys
-                 (update-in [monkey-n :items] (comp vec rest))
-                 (update-in [monkey-n :items-inspected] inc)
-                 ((:test monkey) (quot ((:op monkey) item) worry-div)))
-             monkey-n)
-      all-monkeys)))
+(defn monkey-inspect [worry-fn all-monkeys monkey-n]
+  (loop [monkeys all-monkeys]
+    (let [monkey (get monkeys monkey-n)]
+      (if-let [item (first (:items monkey))]
+        (recur
+         (-> monkeys
+             (update-in [monkey-n :items] (comp vec rest))
+             (update-in [monkey-n :items-inspected] inc)
+             ((:test monkey) (worry-fn ((:op monkey) item)))))
+        monkeys))))
 
-(defn perform-round [worry-div all-monkeys]
-  (reduce (partial monkey-inspect worry-div) all-monkeys (range 0 (count all-monkeys))))
+(defn perform-round [worry-fn all-monkeys]
+  (reduce (partial monkey-inspect worry-fn) all-monkeys (range 0 (count all-monkeys))))
 
-(defn part-* [input worry-div rounds]
-  (->> (nth (iterate (partial perform-round worry-div) input) rounds)
+(defn part-* [input worry-fn rounds]
+  (->> (nth (iterate (partial perform-round worry-fn) input) rounds)
        (map :items-inspected)
        (sort >)
        (take 2)
        (reduce *)))
 
 (defn part1 [input]
-  (part-* input 3 20))
+  (part-* input reduce-worry 20))
 
-(defn monkey-inspect2 [all-monkeys monkey-n]
-  (let [monkey (get all-monkeys monkey-n)]
-    (if-let [item (first (:items monkey))]
-      (recur (-> all-monkeys
-                 (update-in [monkey-n :items] (comp vec rest))
-                 (update-in [monkey-n :items-inspected] inc)
-                 ((:test monkey) ((:op monkey) item)))
-             monkey-n)
-      all-monkeys)))
-
-(defn perform-round2 [all-monkeys]
-  (reduce monkey-inspect2 all-monkeys (range 0 (count all-monkeys))))
-
-(defn part-*2 [input rounds]
-  (->> (nth (iterate perform-round2 input) rounds)
-       (map :items-inspected)
-       (sort >)
-       (take 2)
-       (reduce *)))
+(defn worry-crt [divisor-product item-val]
+  (rem item-val divisor-product))
 
 (defn part2 [input]
-  (part-*2 input 100))
-
+  (let [divisor-product (reduce * (map :test-divisor input))]
+    (part-* input (partial worry-crt divisor-product) 10000)))
 
 (comment
-  (count input)
+  (take 1 input)
+  ;; => ({:items #object[clojure.lang.PersistentQueue 0x6cf577c9 "clojure.lang.PersistentQueue@ed2"], 
+  ;; :op #function[day11.core/parse-operation/fn--13276], 
+  ;; :test #function[day11.core/parse-test/fn--13280], 
+  ;; :test-divisor 17, 
+  ;; :items-inspected 0})
 
-  (part1 input)
+  (time (part1 input))
   ;; => 120056
 
-  ;; woof.
-  ;; 10,000 rounds
-  ;; * 8 monkeys = 80,000 monkey turns
-  ;; and then there's 0 to many inspections per turn.
-  ;; the test input ended up with 150k+ 
-  ;; every function has crazy load, (< round, turn, inspect)
+  (time (part2 test-input))
+  ;; => 2713310158
 
-
-
+  (time (part2 input))
+  ;; => 21816744824
   0)
