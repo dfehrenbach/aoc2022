@@ -11,6 +11,9 @@
 ;; So, looking for the intersections, you might find sensors that agree that an answer could be there.
 ;; Finally, you put all of these under scrutiny looking for any that have exist past all manhatten dists (or has 4 intersections) and voila
 ;; Most of my struggles with the second part still exist in the bottom comment block beneath the supposed answer. Woof. What a problem.
+;; Simplist solution might even be to take away the line-segment restriction
+;; There's more intersections, but it's certainly only at max (* 2 (count input)) per line which you have (* 4 (count input)). 
+;; Easy to check a couple hundred intersecting lines without turning them into line segments.
 
 (defn manhatten-dist [[x1 y1] [x2 y2]]
   (+ (Math/abs (- x2 x1))
