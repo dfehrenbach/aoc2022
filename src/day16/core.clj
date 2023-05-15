@@ -43,75 +43,93 @@
   (let [all-dists-to-valves (find-valve-distances input)]
     (apply g/weighted-graph all-dists-to-valves)))
 
-(defn dfs [graph start]
-  (loop [node start
-         visited #{start}
-         time 30
-         path []
-         vented 0]
-    (if (zero? time) {:path path :vented vented}
-        (if-let [next-node (first (remove visited (g/successors graph node)))]
-          (let [stuff 0]
-            (recur next-node
-                   (conj visited next-node)
-                   time
-                   path
-                   vented))
-          "nowhere else to go just set the time to 0. Everything should be added so far"))))
+(defn next-data [graph flow-map time node node']
+  (let [time' (- time (g/weight graph node node'))
+        next-venting (* (flow-map node') time')]
+    [time' next-venting]))
+
+(defn dfs
+  ([graph flow-map]
+   (let [results (atom [])]
+     (dfs graph flow-map "AA" 30 #{"AA"} 0 results)
+     @results))
+  ([graph flow-map node time visited vented results]
+   (if (<= time 0) (swap! results conj vented)
+       (if (first (remove visited (g/successors graph node)))
+         (doseq [next-node (remove visited (g/successors graph node))]
+           (let [[time' next-venting] (next-data graph flow-map time node next-node)]
+             (dfs graph
+                  flow-map
+                  next-node
+                  time'
+                  (conj visited next-node)
+                  (+ vented next-venting)
+                  results)))
+         (swap! results conj vented)))))
+
+(defn part1 [input]
+  (let [graph (create-distance-graph input)
+        flow-map (name->flow input)]
+    (apply max (dfs graph flow-map))))
+
+(defn dfs-elephant
+  ([graph flow-map]
+   (let [results (atom [])]
+     (dfs-elephant {:graph graph :flow-map flow-map :node "AA" :enode "AA" :time 26 :etime 26 :visited #{"AA"} :vented 0 :results results})
+     @results))
+  ([{:keys [graph flow-map node enode time etime visited vented results] :as data}]
+   (if (and (<= etime 0) (<= time 0)) (swap! results conj vented)
+       (if (first (remove visited (g/successors graph node)))
+         (doseq [node' (remove visited (g/successors graph node))
+                 enode' (remove (conj visited node') (g/successors graph enode))]
+           (let [[time' next-venting] (next-data graph flow-map time node node')
+                 [etime' next-eventing] (next-data graph flow-map etime enode enode')
+                 vented' (+ vented
+                            (if (<= time' 0) 0 next-venting)
+                            (if (<= etime' 0) 0 next-eventing))
+                 data' (-> data
+                           (assoc :node node')
+                           (assoc :enode enode')
+                           (assoc :time time')
+                           (assoc :etime etime')
+                           (update :visited conj node' enode')
+                           (assoc :vented vented'))]
+             (dfs-elephant data')))
+         (swap! results conj vented)))))
+
+(defn part2 [input]
+  (let [graph (create-distance-graph input)
+        flow-map (name->flow input)]
+    (apply max (dfs-elephant graph flow-map))))
 
 
 (comment
-  (create-graph test-input)
-  (name->flow test-input)
+  (part1 test-input)
+  ;; => 1651
 
-  (def test-input-graph (g/graph (create-graph test-input)))
+  (time (part1 input)) ;; 2110.09995791 msecs
+  ;; => 1923
 
-  test-input-graph
 
-  (io/dot-str test-input-graph)
+  (part2 test-input)
+  ;; => 1707
 
-  (a/shortest-path (g/graph (create-graph test-input)) "AA" "GG")
+  (part2 input)
+  ;; => Execution error (OutOfMemoryError) at day16.core/dfs-elephant (core.clj:95).
+  ;;    GC overhead limit exceeded
 
-  ((a/all-pairs-shortest-paths (g/graph (create-graph test-input))) "AA")
+  ;; => 1707
 
-  (non-zero-flow-keys test-input)
 
-  (def dist-to-valve (for [start (conj (non-zero-flow-keys test-input) "AA")
-                           end (remove #{start} (conj (non-zero-flow-keys test-input) "AA"))]
-                       [start end (count (a/shortest-path test-input-graph start end))]))
+  (count (dfs (create-distance-graph input) (name->flow input)))
+  (count (dfs (create-distance-graph test-input) (name->flow test-input)))
 
-  (def test-dist-graph (apply g/weighted-graph dist-to-valve))
+  (count (dfs-elephant (create-distance-graph test-input) (name->flow test-input)))
+  (apply max (dfs-elephant (create-distance-graph test-input) (name->flow test-input)))
+  (create-distance-graph test-input)
 
-  (defn penguin [g start remaining-time]
-    (map (fn [s]
-           (let [time' (- remaining-time
-                          (g/weight g start s))]
-             [s
-              (* ((name->flow test-input) s) time')
-              time'])) (g/successors g start)))
+  (+ 1 1)
 
-  (penguin test-dist-graph "AA" 30)
-  ;; => (["JJ" 567 27] ["HH" 528 24] ["DD" 560 28] ["CC" 54 27] ["BB" 364 28] ["EE" 81 27]) ;;Here we actually chose DD over JJ for 560
-
-  (penguin test-dist-graph "DD" 28)
-  ;; => (["AA" 0 26] ["JJ" 504 24] ["HH" 506 23] ["CC" 52 26] ["BB" 325 25] ["EE" 78 26]) ;;Here we choose BB over HH or JJ for 325
-
-  (penguin test-dist-graph "BB" 25)
-  ;; => (["AA" 0 23] ["JJ" 441 21] ["HH" 396 18] ["DD" 440 22] ["CC" 46 23] ["EE" 63 21]) ;;Here we choose JJ for 441
-
-  (penguin test-dist-graph "JJ" 21)
-  ;; => (["AA" 0 18] ["HH" 286 13] ["DD" 340 17] ["CC" 32 16] ["BB" 221 17] ["EE" 48 16]) ;;Here we choose HH for 286
-
-  (penguin test-dist-graph "HH" 13)
-  ;; => (["AA" 0 7] ["JJ" 105 5] ["DD" 160 8] ["CC" 14 7] ["BB" 78 6] ["EE" 27 9]) ;;Here we choose EE for 27
-
-  (penguin test-dist-graph "EE" 9)
-  ;; => (["AA" 0 6] ["JJ" 84 4] ["HH" 110 5] ["DD" 140 7] ["CC" 12 6] ["BB" 65 5]) ;;Here we choose CC for 12
-
-  (penguin test-dist-graph "CC" 6)
-  ;; => (["AA" 0 3] ["JJ" 21 1] ["HH" 0 0] ["DD" 80 4] ["BB" 52 4] ["EE" 9 3]) 
-
-  (+ 560 325 441 286 27 12)
-
+  (apply max (dfs-elephant (create-distance-graph input) (name->flow input)))
 
   0)

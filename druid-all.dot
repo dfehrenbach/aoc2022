@@ -1,0 +1,149 @@
+graph "graph" {
+  ":hurricane" -- ":nature" ["label"="1"]
+  ":hurricane" -- ":storm" ["label"="1"]
+  ":hurricane" -- ":hurricane" ["label"="2"]
+  ":hurricane" -- ":shapeshift" ["label"="1"]
+  ":fortify" -- ":fortify" ["label"="3"]
+  ":fortify" -- ":earth" ["label"="2"]
+  ":fortify" -- ":nature" ["label"="2"]
+  ":fortify" -- ":shapeshift" ["label"="1"]
+  ":shred" -- ":wolf" ["label"="1"]
+  ":shred" -- ":shapeshift" ["label"="1"]
+  ":shred" -- ":shred" ["label"="1"]
+  ":shred" -- ":poison" ["label"="1"]
+  ":roar" -- ":bear" ["label"="1"]
+  ":roar" -- ":shapeshift" ["label"="1"]
+  ":roar" -- ":roar" ["label"="1"]
+  ":roar" -- ":poison" ["label"="1"]
+  ":roar" -- ":cc" ["label"="1"]
+  ":bear" -- ":bear" ["label"="10"]
+  ":bear" -- ":spirit" ["label"="2"]
+  ":bear" -- ":pulverize" ["label"="2"]
+  ":bear" -- ":wolf" ["label"="3"]
+  ":bear" -- ":landslide" ["label"="1"]
+  ":bear" -- ":critdamage" ["label"="1"]
+  ":bear" -- ":storm" ["label"="1"]
+  ":bear" -- ":cc" ["label"="1"]
+  ":bear" -- ":companions" ["label"="1"]
+  ":bear" -- ":nature" ["label"="3"]
+  ":bear" -- ":crit" ["label"="1"]
+  ":bear" -- ":earth" ["label"="3"]
+  ":bear" -- ":trample" ["label"="1"]
+  ":bear" -- ":poison" ["label"="2"]
+  ":bear" -- ":shapeshift" ["label"="7"]
+  ":bulwark" -- ":earth" ["label"="2"]
+  ":bulwark" -- ":nature" ["label"="2"]
+  ":bulwark" -- ":bulwark" ["label"="2"]
+  ":bulwark" -- ":cc" ["label"="1"]
+  ":spirit" -- ":spirit" ["label"="7"]
+  ":spirit" -- ":wolf" ["label"="2"]
+  ":spirit" -- ":storm" ["label"="1"]
+  ":spirit" -- ":cc" ["label"="1"]
+  ":spirit" -- ":nature" ["label"="1"]
+  ":spirit" -- ":earthspike" ["label"="1"]
+  ":spirit" -- ":earth" ["label"="1"]
+  ":spirit" -- ":windshear" ["label"="1"]
+  ":spirit" -- ":shapeshift" ["label"="2"]
+  ":companion" -- ":companion" ["label"="3"]
+  ":companion" -- ":wolf" ["label"="1"]
+  ":companion" -- ":shapeshift" ["label"="1"]
+  ":companion" -- ":poison" ["label"="1"]
+  ":pulverize" -- ":earth" ["label"="1"]
+  ":pulverize" -- ":nature" ["label"="1"]
+  ":pulverize" -- ":pulverize" ["label"="2"]
+  ":pulverize" -- ":shapeshift" ["label"="2"]
+  ":wolf" -- ":wolf" ["label"="10"]
+  ":wolf" -- ":storm" ["label"="2"]
+  ":wolf" -- ":companions" ["label"="1"]
+  ":wolf" -- ":nature" ["label"="2"]
+  ":wolf" -- ":crit" ["label"="2"]
+  ":wolf" -- ":earth" ["label"="1"]
+  ":wolf" -- ":poison" ["label"="3"]
+  ":wolf" -- ":shapeshift" ["label"="8"]
+  ":boulder" -- ":nature" ["label"="1"]
+  ":boulder" -- ":earth" ["label"="1"]
+  ":boulder" -- ":boulder" ["label"="1"]
+  ":landslide" -- ":nature" ["label"="2"]
+  ":landslide" -- ":earth" ["label"="2"]
+  ":landslide" -- ":landslide" ["label"="2"]
+  ":landslide" -- ":trample" ["label"="1"]
+  ":critdamage" -- ":crit" ["label"="1"]
+  ":critdamage" -- ":critdamage" ["label"="1"]
+  ":critdamage" -- ":shapeshift" ["label"="1"]
+  ":storm" -- ":storm" ["label"="13"]
+  ":storm" -- ":nature" ["label"="13"]
+  ":storm" -- ":cyclonearmor" ["label"="1"]
+  ":storm" -- ":crit" ["label"="3"]
+  ":storm" -- ":slow" ["label"="1"]
+  ":storm" -- ":lightningstorm" ["label"="1"]
+  ":storm" -- ":tornado" ["label"="1"]
+  ":storm" -- ":earth" ["label"="4"]
+  ":storm" -- ":lucky" ["label"="1"]
+  ":storm" -- ":windshear" ["label"="1"]
+  ":storm" -- ":shapeshift" ["label"="1"]
+  ":cc" -- ":cc" ["label"="4"]
+  ":cc" -- ":nature" ["label"="2"]
+  ":cc" -- ":earth" ["label"="2"]
+  ":cc" -- ":poison" ["label"="1"]
+  ":cc" -- ":shapeshift" ["label"="1"]
+  ":companions" -- ":companions" ["label"="1"]
+  ":companions" -- ":shapeshift" ["label"="1"]
+  ":nature" -- ":nature" ["label"="22"]
+  ":nature" -- ":cyclonearmor" ["label"="1"]
+  ":nature" -- ":crit" ["label"="3"]
+  ":nature" -- ":slow" ["label"="1"]
+  ":nature" -- ":lightningstorm" ["label"="1"]
+  ":nature" -- ":tornado" ["label"="1"]
+  ":nature" -- ":earth" ["label"="13"]
+  ":nature" -- ":lucky" ["label"="1"]
+  ":nature" -- ":trample" ["label"="1"]
+  ":nature" -- ":windshear" ["label"="1"]
+  ":nature" -- ":shapeshift" ["label"="2"]
+  ":cyclonearmor" -- ":cyclonearmor" ["label"="1"]
+  ":crit" -- ":crit" ["label"="5"]
+  ":crit" -- ":shapeshift" ["label"="3"]
+  ":slow" -- ":earth" ["label"="1"]
+  ":slow" -- ":slow" ["label"="1"]
+  ":earthspike" -- ":earth" ["label"="1"]
+  ":earthspike" -- ":earthspike" ["label"="1"]
+  ":lightningstorm" -- ":lightningstorm" ["label"="1"]
+  ":tornado" -- ":tornado" ["label"="1"]
+  ":earth" -- ":earth" ["label"="14"]
+  ":earth" -- ":trample" ["label"="1"]
+  ":earth" -- ":shapeshift" ["label"="1"]
+  ":lucky" -- ":lucky" ["label"="1"]
+  ":trample" -- ":trample" ["label"="1"]
+  ":windshear" -- ":windshear" ["label"="1"]
+  ":poison" -- ":poison" ["label"="4"]
+  ":poison" -- ":shapeshift" ["label"="4"]
+  ":shapeshift" -- ":shapeshift" ["label"="15"]
+  ":hurricane"
+  ":fortify"
+  ":shred"
+  ":roar"
+  ":bear"
+  ":bulwark"
+  ":spirit"
+  ":companion"
+  ":pulverize"
+  ":wolf"
+  ":boulder"
+  ":landslide"
+  ":critdamage"
+  ":storm"
+  ":cc"
+  ":companions"
+  ":nature"
+  ":cyclonearmor"
+  ":crit"
+  ":slow"
+  ":earthspike"
+  ":lightningstorm"
+  ":tornado"
+  ":earth"
+  ":lucky"
+  ":trample"
+  ":windshear"
+  ":poison"
+  ":shapeshift"
+}
